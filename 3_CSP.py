@@ -86,10 +86,6 @@ class SudokuEnv:
             if self.final_values[ key ] == 0 and len( value ) < 1: return False
         return True
 
-    def get_possible_values( self ):
-        """Return the possible values for a specifc index."""
-        return self.possible_values
-
     def __set_singleton_cells( self ):
         """Writes values to cells which have exactly 1 possible value."""
         for key, value in self.possible_values.items():
@@ -122,8 +118,7 @@ class SudokuEnv:
         return f"{np.matrix( d2array )}"
 
 
-######################SEARCHING ALGORITHM BELOW##############################
-
+#########################SUDOKU CHECKER BELOW#################################
 def check_sudoku( grid ):
     """ Return True if grid is a valid Sudoku square, otherwise False. """
     # convert to numpy array if not already converted
@@ -137,6 +132,8 @@ def check_sudoku( grid ):
             return False
     return True
 
+
+######################SEARCHING ALGORITHM BELOW##############################
 def pick_next_cell( state ):
     """
     Used in depth first search, currently chooses a random 
@@ -191,7 +188,6 @@ def depth_first_search( state ):
    
     return None
 
-
 def sudoku_solver( puzzle : np.array ):
 
     # if check_sudoku( puzzle ):
@@ -203,7 +199,7 @@ def sudoku_solver( puzzle : np.array ):
     return -np.ones((9, 9))
 
 
-
+######################PERFORMANCE TESTS BELOW##############################
 if __name__ == "__main__":
     SKIP_TESTS = False
 
