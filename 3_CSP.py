@@ -1,4 +1,6 @@
 from collections import defaultdict
+from collections import Counter
+from tests import run_tests
 
 import numpy as np
 import time
@@ -25,6 +27,12 @@ class SudokuEnv:
         # after dict is created, delete all the rcbs for values already placed in final_values list
         [self.__eliminate_rcb( index = key ) for key, values in self.possible_values.items() if len(values) <= 1]
 
+    def get_counts( self ):
+        """Return the counts of each number in Sudoku puzzle (excluding zeros)"""
+        counts = Counter( self.final_values )
+        del counts[0]
+        return counts
+        
     def __plus_minus( self ):
         """Flip between +1 and -1 for iterating through Sudoku box dict."""
         while True:
@@ -120,45 +128,42 @@ class SudokuEnv:
 
 #########################SUDOKU CHECKER BELOW#################################
 def check_sudoku( grid ):
-    """ Return True if grid is a valid Sudoku square, otherwise False. """
+    """ Return True if grid is a valid Sudoku puzzle else False."""
     # convert to numpy array if not already converted
     grid = np.array(grid) if not isinstance(grid,np.ndarray) else grid
 
     for i in range(9):
         # j, k index top left hand corner of each 3x3 tile
         j, k = (i // 3) * 3, (i % 3) * 3
-        if len(set(grid[i,:])) != 9 or len(set(grid[:,i])) != 9\
-                        or len(set(grid[j:j+3, k:k+3].ravel())) != 9:
+
+        # row excluding zeros
+        row = grid[i,:][ grid[i,:] != 0 ]
+        row_repeated = len( set(np.unique(row, return_counts=True)[1]) ) > 1
+
+        # col excluding zeros
+        col = grid[:,i][ grid[:,i] != 0 ]
+        col_repeated = len( set(np.unique(col, return_counts=True)[1]) ) > 1
+
+        # box excluding zeros
+        box = grid[j:j+3, k:k+3][ grid[j:j+3, k:k+3] != 0 ]
+        box_repeated = len( set(np.unique(box, return_counts=True)[1]) ) > 1
+
+        if row_repeated or col_repeated or box_repeated:
             return False
     return True
 
 
 ######################SEARCHING ALGORITHM BELOW##############################
 def pick_next_cell( state ):
-    """
-    Used in depth first search, currently chooses a random 
-    column that has more than one possible value
-    """
-    
-    cell_indices = [ keys for keys, values in state.possible_values.items() if len(values) > 0 ]
-    # return random.choice( cell_indices )
-
-    min = 10
-    min_index = None
-    for index in cell_indices:
-        val = len(state.possible_values[index])
-        if len(state.possible_values[index]) < min:
-            min = val
-            min_index = index
+    """Return the index of the most constrained cell next."""
+    vals = [ value for index, value in state.possible_values.items() if len(value) > 0 ]
+    min_index = list( state.possible_values.values() ).index( min(vals, key=len) )
     return min_index
 
 def order_possible_values( state, index ):
-    """
-    Get values for a particular column in the 
-    order we should try them in. Currently random.
-    """
-    values = state.possible_values[ index ]
-    random.shuffle(values)
+    """Order the values so most constraining value (value placed most frequently) is chosen."""
+    possVals = state.possible_values[ index ]
+    values = [ num[0] for num in reversed(state.get_counts().most_common()) if num[0] in possVals ]
     return values
 
 def depth_first_search( state ):
@@ -190,118 +195,27 @@ def depth_first_search( state ):
 
 def sudoku_solver( puzzle : np.array ):
 
-    # if check_sudoku( puzzle ):
-    final = depth_first_search( SudokuEnv( puzzle ) )
+    if check_sudoku( puzzle ):
+        final = depth_first_search( SudokuEnv( puzzle ) )
 
-    if final is not None:
-        result = np.array( [final.final_values[i:i + final.col] for i in range(0, len(final.final_values), final.col)] )
-        return result
+        if final is not None:
+            result = np.array( [final.final_values[i:i + final.col] for i in range(0, len(final.final_values), final.col)] )
+            return result
     return -np.ones((9, 9))
 
 
 ######################PERFORMANCE TESTS BELOW##############################
+
+puzzle = [[0,6,1,0,0,7,0,0,3],
+          [0,9,2,0,0,3,0,0,0],
+          [0,0,0,0,0,0,0,0,0],
+          [0,0,8,5,3,0,0,0,0],
+          [0,0,0,0,0,0,5,0,4],
+          [5,0,0,0,0,8,0,0,0],
+          [0,4,0,0,0,0,0,0,1],
+          [0,0,0,1,6,0,8,0,0],
+          [6,0,0,0,0,0,0,0,0]]
+
 if __name__ == "__main__":
-    SKIP_TESTS = False
-
-    if not SKIP_TESTS:
-        difficulties = ['very_easy', 'easy', 'medium', 'hard']
-
-        for difficulty in difficulties:
-            print(f"Testing {difficulty} sudokus")
-
-            sudokus = np.load(f"data/{difficulty}_puzzle.npy")
-            solutions = np.load(f"data/{difficulty}_solution.npy")
-
-            count = 0
-            for i in range(len(sudokus)):
-                sudoku = sudokus[i].copy()
-                print(f"This is {difficulty} sudoku number", i)
-                print(sudoku)
-
-                start_time = time.process_time()
-                your_solution = sudoku_solver(sudoku)
-                end_time = time.process_time()
-
-                print(f"This is your solution for {difficulty} sudoku number", i)
-                print(your_solution)
-
-                print("Is your solution correct?")
-                if np.array_equal(your_solution, solutions[i]):
-                    print("Yes! Correct solution.")
-                    count += 1
-                else:
-                    print("No, the correct solution is:")
-                    print(solutions[i])
-
-                print("This sudoku took", end_time - start_time, "seconds to solve.\n")
-
-            print(f"{count}/{len(sudokus)} {difficulty} sudokus correct")
-            if count < len(sudokus):
-                break
-
-
-
-
-# if __name__ == '__main__':
-#     puzzle = [[5,1,2,6,7,4,8,3,0],
-#             [6,0,0,1,9,5,0,0,0],
-#             [0,9,8,0,0,0,0,6,0],
-#             [8,0,0,0,6,0,0,0,3],
-#             [4,0,0,8,0,3,0,0,1],
-#             [7,0,0,0,2,0,0,0,6],
-#             [0,6,0,0,0,0,2,8,0],
-#             [0,0,0,4,1,0,0,0,5],
-#             [0,0,0,0,8,0,0,7,0]]
-
-#     puzzle=[[5,3,0,0,7,0,0,0,0],
-#             [6,0,0,1,9,5,0,0,0],
-#             [0,9,8,0,0,0,0,6,0],
-#             [8,0,0,0,6,0,0,0,3],
-#             [4,0,0,8,0,3,0,0,1],
-#             [7,0,0,0,2,0,0,0,6],
-#             [0,6,0,0,0,0,2,8,0],
-#             [0,0,0,4,1,9,0,0,5],
-#             [0,0,0,0,8,0,0,7,9]]
-
-#     # puzzle = np.array(puzzle)
-
-#     difficulties = ['very_easy', 'easy', 'medium', 'hard']
-#     difficulty = difficulties[2]
-#     sudokus = np.load(f"data/{difficulty}_puzzle.npy")
-#     solutions = np.load(f"data/{difficulty}_solution.npy")
-
-
-#     num = 9
-#     puzzle = sudokus[num]
-
-#     # print(f"Problem:\n{sudokus[num]}")
-#     # print("")
-#     # print(f"Solution:\n{solutions[num]}")
-
-#     env = SudokuEnv(puzzle)
-
-#     # env.__eliminate_rcb(index = 2)
-
-#     # depth_first_search( env )
-
-#     sudoku_solver( puzzle )
-
-#     # print(f"Answer:\n{depth_first_search( env )}")
-
-
-#     # print(f"{env} \n")
-#     # child_env = env.assign_value( value = 2, index = 8 )
-#     # print(f"{child_env} \n")
-#     # print(f"{env} \n")
-
-#     # pick_next_cell(env)
-
-#     # print(f"Is Legal: {env.is_legal()}")
-#     # print(f"Is Goal: {env.is_goal()}")
-
-
-
-    
-
-#     # # child_env.change_things()
-#     # print(env.possible_values)
+    # pass the solver through to run tests on it
+    run_tests( sudoku_solver, skip_tests=False, puzzle=np.array(puzzle))
