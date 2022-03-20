@@ -1,6 +1,6 @@
 from collections import defaultdict
 from collections import Counter
-from tests import run_tests
+from tests import run_tests, create_puzzle
 
 import numpy as np
 import time
@@ -199,13 +199,18 @@ def sudoku_solver( puzzle : np.array ):
         final = depth_first_search( SudokuEnv( puzzle ) )
 
         if final is not None:
+            # convert result into a numpy array format
             result = np.array( [final.final_values[i:i + final.col] for i in range(0, len(final.final_values), final.col)] )
             return result
     return -np.ones((9, 9))
 
+def run():
+    # pass the solver through to run tests on it
+    run_tests( sudoku_solver, skip_tests=False)#, puzzle=np.array(puzzle))
+
 
 ######################PERFORMANCE TESTS BELOW##############################
-
+# V Hard Puzzle
 puzzle = [[0,6,1,0,0,7,0,0,3],
           [0,9,2,0,0,3,0,0,0],
           [0,0,0,0,0,0,0,0,0],
@@ -218,4 +223,4 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
 
 if __name__ == "__main__":
     # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False, puzzle=np.array(puzzle))
+    run_tests( sudoku_solver, skip_tests=False)#, puzzle=np.array(puzzle))

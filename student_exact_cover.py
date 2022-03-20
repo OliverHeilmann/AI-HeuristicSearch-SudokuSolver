@@ -1,4 +1,4 @@
-from tests import run_tests
+from tests import run_tests, create_puzzle
 
 import numpy as np
 import time

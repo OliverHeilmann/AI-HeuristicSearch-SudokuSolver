@@ -1,33 +1,8 @@
-from tests import run_tests
+from tests import run_tests, create_puzzle
 
 import numpy as np
 import time
 import csv, random
-
-def create_puzzle():
-    base  = 3
-    side  = base*base
-
-    # pattern for a baseline valid solution
-    def pattern(r,c): return (base*(r%base)+r//base+c)%side
-
-    # randomize rows, columns and numbers (of valid base pattern)
-    from random import sample
-    def shuffle(s): return sample(s,len(s)) 
-    rBase = range(base) 
-    rows  = [ g*base + r for g in shuffle(rBase) for r in shuffle(rBase) ] 
-    cols  = [ g*base + c for g in shuffle(rBase) for c in shuffle(rBase) ]
-    nums  = shuffle(range(1,base*base+1))
-
-    # produce board using randomized baseline pattern
-    board =[ [nums[pattern(r,c)] for c in cols] for r in rows ]
-
-    squares = side*side
-    empties = squares * 3//4
-    for p in sample(range(squares),empties):
-        board[p//side][p%side] = 0
-
-    return np.array(board)
 
 
 not_solvable = -np.ones((9, 9))
@@ -110,10 +85,9 @@ def sudoku_solver(grid):
         return np.array(grid)
     else:
         return not_solvable
-    
 
 
-
+# Medium Puzzle
 puzzle = [[5,3,0,0,7,0,0,0,0],
           [6,0,0,1,9,5,0,0,0],
           [0,9,8,0,0,0,0,6,0],
@@ -124,7 +98,7 @@ puzzle = [[5,3,0,0,7,0,0,0,0],
           [0,0,0,4,1,9,0,0,5],
           [0,0,0,0,8,0,0,7,9]]
 
-
+# V Hard Puzzle
 puzzle = [[0,6,1,0,0,7,0,0,3],
           [0,9,2,0,0,3,0,0,0],
           [0,0,0,0,0,0,0,0,0],
@@ -138,3 +112,7 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
 if __name__ == "__main__":
     # pass the solver through to run tests on it
     run_tests( sudoku_solver, skip_tests=False, puzzle=puzzle )
+
+    # for i in range(100):
+    #     puzzle = create_puzzle()
+    #     run_tests( sudoku_solver, skip_tests=False, puzzle=puzzle )

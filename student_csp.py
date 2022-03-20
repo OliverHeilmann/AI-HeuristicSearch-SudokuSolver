@@ -1,4 +1,4 @@
-from tests import run_tests
+from tests import run_tests, create_puzzle
    
 import copy
 import time
@@ -279,7 +279,7 @@ def sudoku_solver(state: np.ndarray) -> np.ndarray:
     """
     return backtrack(SudokuState(state)).values
 
-
+# V Hard Puzzle
 puzzle = [[0,6,1,0,0,7,0,0,3],
           [0,9,2,0,0,3,0,0,0],
           [0,0,0,0,0,0,0,0,0],
