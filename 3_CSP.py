@@ -31,6 +31,10 @@ class SudokuEnv:
         """Return the counts of each number in Sudoku puzzle (excluding zeros)"""
         counts = Counter( self.final_values )
         del counts[0]
+
+        # add 1 -> 9 if not already in (where puzzle doesn't have any X's on the board)
+        for i in range( 1, self.row+1 ):
+            if i not in counts: counts[i] = 0
         return counts
         
     def __plus_minus( self ):
