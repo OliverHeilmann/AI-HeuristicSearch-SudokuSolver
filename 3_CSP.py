@@ -1,3 +1,7 @@
+# Written by Oliver Heilmann
+# For performance testing, use:
+#   scalene --profile-interval 5.0 CODENAME.py
+
 from collections import defaultdict
 from collections import Counter
 from tests import run_tests, create_puzzle
