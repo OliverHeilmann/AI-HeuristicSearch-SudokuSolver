@@ -1,13 +1,15 @@
 # Written by Oliver Heilmann
 # For performance testing, use:
 #   scalene --profile-interval 5.0 CODENAME.py
-# @staticmethod
+#
+# (Note: Convert to cython for faster performance!)
 
 from collections import defaultdict
 from collections import Counter
 from tests import run_tests, create_puzzle
 
 import numpy as np
+import _pickle as cPickle
 import time
 import random
 import copy
@@ -119,7 +121,8 @@ class SudokuEnv:
             if value in self.possible_values[ index ]: 
             
                 # deep copy of child state (not overwriting existing data in state)
-                child_state = copy.deepcopy( self )
+                # child_state = copy.deepcopy( self )
+                child_state = cPickle.loads( cPickle.dumps(self, -1) )  # method reduces time taken by x1 second
 
                 child_state.final_values[ index ] = value    # assign new value
 
@@ -145,7 +148,6 @@ class SudokuEnv:
     #     state.possible_values = copy.deepcopy(self.possible_values)#.copy()
     #     state.row, state.col = (self.row, self.col)
     #     return state
-
 
 
 #########################SUDOKU CHECKER BELOW#################################
@@ -207,9 +209,6 @@ def depth_first_search( state ):
         if new_state.is_goal():
             return new_state
 
-        # if new_state.is_legal() != True:
-        #     print(1)
-
         if new_state.is_legal():
             deep_state = depth_first_search( new_state )
 
@@ -230,7 +229,7 @@ def sudoku_solver( puzzle : np.array ):
 
 def run():
     # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False)#, puzzle=np.array(puzzle))
+    run_tests( sudoku_solver, skip_tests=False )#, puzzle=np.array(puzzle))
 
 
 ######################PERFORMANCE TESTS BELOW##############################
@@ -247,4 +246,4 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
 
 if __name__ == "__main__":
     # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False)#, puzzle=np.array(puzzle))
+    run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(puzzle))

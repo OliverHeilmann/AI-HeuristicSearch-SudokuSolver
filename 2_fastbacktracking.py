@@ -111,7 +111,7 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
 
 if __name__ == "__main__":
     # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False, puzzle=puzzle )
+    run_tests( sudoku_solver, skip_tests=False) #, puzzle=puzzle )
 
     # for i in range(100):
     #     puzzle = create_puzzle()
