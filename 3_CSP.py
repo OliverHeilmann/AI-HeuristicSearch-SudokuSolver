@@ -1,6 +1,7 @@
 # Written by Oliver Heilmann
 # For performance testing, use:
 #   scalene --profile-interval 5.0 CODENAME.py
+# @staticmethod
 
 from collections import defaultdict
 from collections import Counter
@@ -14,7 +15,6 @@ import copy
 ######################SUDOKU ENVIRONMENT BELOW##############################
 class SudokuEnv:
     """Sudoku environment from which all constraint satisfaction happens."""
-    
     def __init__( self, puzzle : np.ndarray ):
         self.row, self.col = puzzle.shape
         
@@ -41,7 +41,8 @@ class SudokuEnv:
             if i not in counts: counts[i] = 0
         return counts
         
-    def __plus_minus( self ):
+    @classmethod
+    def __plus_minus( cls ):
         """Flip between +1 and -1 for iterating through Sudoku box dict."""
         while True:
             yield 0
@@ -50,7 +51,7 @@ class SudokuEnv:
 
     def __eliminate_rcb( self, index : int):
         """Eliminate the rows, cols, boxes with reocurring values."""
-        value = self.final_values[index]    # look at what value is at passed index (must be x1!)
+        value = self.final_values[ index ]    # look at what value is at passed index (must be x1!)
         
         if value != 0:
             colloc = (index % self.col)
@@ -96,7 +97,7 @@ class SudokuEnv:
         """Goal state reached if every value is not equal to zero."""
         return True if 0 not in self.final_values else False
 
-    def is_legal(self):
+    def is_legal( self ):
         """This state is illegal if cells no longer have possible values and are still empty."""
         for key, value in self.possible_values.items():
             if self.final_values[ key ] == 0 and len( value ) < 1: return False
@@ -104,10 +105,13 @@ class SudokuEnv:
 
     def __set_singleton_cells( self ):
         """Writes values to cells which have exactly 1 possible value."""
-        for key, value in self.possible_values.items():
-            if self.final_values[ key ] == 0 and len( value ) == 1: 
-                self.final_values[ key ] = value[0]
-                self.__eliminate_rcb( key )
+        items = [-1]
+        while any( items ): # after adding new singletons, sometimes more appear, while loop to catch them!
+            items = [ (key,value) for key, value in self.possible_values.items() if len( value ) == 1 ]
+            for key, value in items:
+                if self.final_values[ key ] == 0 and len( value ) == 1: 
+                    self.final_values[ key ] = value[0]
+                    self.__eliminate_rcb( index = key )
 
     def assign_value( self, index, value ):
         """Based on CSP approach, search algorithm has decided to try a value, now do it!"""
@@ -132,6 +136,16 @@ class SudokuEnv:
         """Return a string Sudoku matrix for debugging."""
         d2array = [self.final_values[i:i + self.col] for i in range(0, len(self.final_values), self.col)]
         return f"{np.matrix( d2array )}"
+
+    # def __deepcopy__( self, memodict={} ):
+    #     """Custom Deepcopy to avoid uneccessary copying of object atributes (speed up code)."""
+    #     cls = self.__class__
+    #     state = cls.__new__( cls )
+    #     state.final_values = copy.deepcopy(self.final_values)#.copy()
+    #     state.possible_values = copy.deepcopy(self.possible_values)#.copy()
+    #     state.row, state.col = (self.row, self.col)
+    #     return state
+
 
 
 #########################SUDOKU CHECKER BELOW#################################
@@ -193,12 +207,14 @@ def depth_first_search( state ):
         if new_state.is_goal():
             return new_state
 
+        # if new_state.is_legal() != True:
+        #     print(1)
+
         if new_state.is_legal():
             deep_state = depth_first_search( new_state )
 
             if deep_state is not None and deep_state.is_goal():
                 return deep_state
-   
     return None
 
 def sudoku_solver( puzzle : np.array ):
