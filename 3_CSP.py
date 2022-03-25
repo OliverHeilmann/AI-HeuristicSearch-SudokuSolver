@@ -14,6 +14,7 @@ import time
 import random
 import copy
 
+
 ######################SUDOKU ENVIRONMENT BELOW##############################
 class SudokuEnv:
     """Sudoku environment from which all constraint satisfaction happens."""
@@ -156,7 +157,7 @@ def check_sudoku( grid ):
     # convert to numpy array if not already converted
     grid = np.array(grid) if not isinstance(grid,np.ndarray) else grid
 
-    for i in range(9):
+    for i in range( grid.shape[0] ):
         # j, k index top left hand corner of each 3x3 tile
         j, k = (i // 3) * 3, (i % 3) * 3
 
@@ -191,15 +192,7 @@ def order_possible_values( state, index ):
     return values
 
 def depth_first_search( state ):
-    """
-    This will do a depth first search on partial states, trying 
-    each possible value for a single column.
-
-    Notice that we do not need to try every column: if we try 
-    every possible value for a column and can't find a
-    solution, then there is no possible value for this column, 
-    so there is no solution.
-    """
+    """Use backtracking search approach with constraint satisfaction propagation."""
     index = pick_next_cell( state )
     values = order_possible_values( state, index)
 
@@ -217,7 +210,7 @@ def depth_first_search( state ):
     return None
 
 def sudoku_solver( puzzle : np.array ):
-
+    """Function to conform with coursework framework"""
     if check_sudoku( puzzle ):
         final = depth_first_search( SudokuEnv( puzzle ) )
 
@@ -226,10 +219,6 @@ def sudoku_solver( puzzle : np.array ):
             result = np.array( [final.final_values[i:i + final.col] for i in range(0, len(final.final_values), final.col)] )
             return result
     return -np.ones((9, 9))
-
-def run():
-    # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False )#, puzzle=np.array(puzzle))
 
 
 ######################PERFORMANCE TESTS BELOW##############################
@@ -246,4 +235,14 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
 
 if __name__ == "__main__":
     # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(puzzle))
+
+    for i in range(1000):
+        puzzle = create_puzzle()
+        ST = time.process_time()
+        sudoku_solver( puzzle )
+        ET = time.process_time()
+        if ET-ST > 10:
+            print(puzzle)
+            print(f"Puzzle {i} | Time: {ET-ST}")
+
+    # run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(puzzle))

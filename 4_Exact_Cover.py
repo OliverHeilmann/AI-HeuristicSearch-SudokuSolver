@@ -1,109 +1,68 @@
-#!/usr/bin/env python3
-
-# Author: Ali Assaf <ali.assaf.mail@gmail.com>
-# Copyright: (C) 2010 Ali Assaf
-# License: GNU General Public License <http://www.gnu.org/licenses/>
-
+from collections import defaultdict
+from collections import Counter
+from tests import run_tests, create_puzzle
 from itertools import product
 
-def solve_sudoku(size, grid):
-    """ An efficient Sudoku solver using Algorithm X.
+import numpy as np
+import _pickle as cPickle
+import time
+import random
+import copy
 
-    >>> grid = [
-    ...     [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    ...     [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    ...     [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    ...     [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    ...     [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    ...     [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    ...     [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    ...     [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    ...     [0, 0, 0, 0, 8, 0, 0, 7, 9]]
-    >>> for solution in solve_sudoku((3, 3), grid):
-    ...     print(*solution, sep='\\n')
-    [5, 3, 4, 6, 7, 8, 9, 1, 2]
-    [6, 7, 2, 1, 9, 5, 3, 4, 8]
-    [1, 9, 8, 3, 4, 2, 5, 6, 7]
-    [8, 5, 9, 7, 6, 1, 4, 2, 3]
-    [4, 2, 6, 8, 5, 3, 7, 9, 1]
-    [7, 1, 3, 9, 2, 4, 8, 5, 6]
-    [9, 6, 1, 5, 3, 7, 2, 8, 4]
-    [2, 8, 7, 4, 1, 9, 6, 3, 5]
-    [3, 4, 5, 2, 8, 6, 1, 7, 9]
-    """
-    R, C = size
-    N = R * C
-    X = ([("rc", rc) for rc in product(range(N), range(N))] +
-         [("rn", rn) for rn in product(range(N), range(1, N + 1))] +
-         [("cn", cn) for cn in product(range(N), range(1, N + 1))] +
-         [("bn", bn) for bn in product(range(N), range(1, N + 1))])
-    Y = dict()
-    for r, c, n in product(range(N), range(N), range(1, N + 1)):
-        b = (r // R) * R + (c // C) # Box number
-        Y[(r, c, n)] = [
-            ("rc", (r, c)),
-            ("rn", (r, n)),
-            ("cn", (c, n)),
-            ("bn", (b, n))]
-    X, Y = exact_cover(X, Y)
-    for i, row in enumerate(grid):
-        for j, n in enumerate(row):
-            if n:
-                select(X, Y, (i, j, n))
-    for solution in solve(X, Y, []):
-        for (r, c, n) in solution:
-            grid[r][c] = n
-        yield grid
+###################### SUDOKU ENVIRONMENT BELOW ##############################
+class SudokuEnv:
+    """Sudoku environment from which all constraint satisfaction happens."""
+    def __init__( self, grid : np.ndarray ):
+        (row, col) = grid.shape
 
-def exact_cover(X, Y):
-    X = {j: set() for j in X}
-    for i, row in Y.items():
-        for j in row:
-            X[j].add(i)
-    return X, Y
+        # init final values np array (could deepcopy grid but will be looping through below anyway)
+        self.result = np.array( [[0] * row] * col )
 
-def solve(X, Y, solution):
-    if not X:
-        yield list(solution)
-    else:
-        c = min(X, key=lambda c: len(X[c]))
-        for r in list(X[c]):
-            solution.append(r)
-            cols = select(X, Y, r)
-            for s in solve(X, Y, solution):
-                yield s
-            deselect(X, Y, r, cols)
-            solution.pop()
+        self.R = dict()
+        self.C = defaultdict( lambda : set() )  # dynamically create set when key is made
 
-def select(X, Y, r):
-    cols = []
-    for j in Y[r]:
-        for i in X[j]:
-            for k in Y[i]:
-                if k != j:
-                    X[k].remove(i)
-        cols.append(X.pop(j))
-    return cols
+        # Make both column and R in same loop -> colverCols will have 
+        # cases where items are overwritten but not an issue at initialisation.
+        for r, c, val in product( range(row), range(row), range(1,row+1) ):
 
-def deselect(X, Y, r, cols):
-    for j in reversed(Y[r]):
-        X[j] = cols.pop()
-        for i in X[j]:
-            for k in Y[i]:
-                if k != j:
-                    X[k].add(i)
+            # build up results np array
+            self.result[r][c] = grid[r][c]
 
-grid = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
-        [6, 0, 0, 1, 9, 5, 0, 0, 0],
-        [0, 9, 8, 0, 0, 0, 0, 6, 0],
-        [8, 0, 0, 0, 6, 0, 0, 0, 3],
-        [4, 0, 0, 8, 0, 3, 0, 0, 1],
-        [7, 0, 0, 0, 2, 0, 0, 0, 6],
-        [0, 6, 0, 0, 0, 0, 2, 8, 0],
-        [0, 0, 0, 4, 1, 9, 0, 0, 5],
-        [0, 0, 0, 0, 8, 0, 0, 7, 9]]
+            # Box index as [0, 1, 2, 3, 4 ---> 8] (note only works for 9x9 Sudoku!)
+            b = (r//3) * 3 + (c//3)
+
+            # create exact cover R
+            self.R[ (r, c, val) ] = [  ("Cell", (r, c)),
+                                        ("RowN", (r, val)),    # +1 to val for range 1->9
+                                        ("ColN", (c, val)),    # +1 to val for range 1->9
+                                        ("BoxN", (b, val))]    # +1 to val for range 1->9
+
+            # create exact cover column dictionary if not already made, then add constraint 
+            # to it immediately (if not already present)
+            self.C[ "Cell", (r, c) ].add( (r, c, val) )
+            self.C[ "RowN", (r, val) ].add( (r, c, val) )
+            self.C[ "ColN", (c, val) ].add( (r, c, val) )
+            self.C[ "BoxN", (b, val) ].add( (r, c, val) )
+
+        # loop through grid and delete rcv's which conflict with pre-assigned grid vals
+        for (r, c), val in np.ndenumerate( grid ):
+            if val: self.__eliminateRCV( (r, c, val) )
+
+    def __eliminateRCV( self, RCV ):
+        """Delete all conflicting rcv's, but store them in a returned list.'"""
+        rcvStore = list()
+        for c in self.R[ RCV ]:   # for all the cols at current row
+            for _rcv in self.C[ c ]: # for all the rcvs at current col (col and row now)
+                for _c in self.R[ _rcv ]: # for the col entries at current row
+                    if _c != c: self.C[_c].remove( _rcv )
+            rcvStore.append( self.C.pop( c ) )
+        return rcvStore
 
 
+
+
+
+# V Hard Puzzle
 puzzle = [[0,6,1,0,0,7,0,0,3],
           [0,9,2,0,0,3,0,0,0],
           [0,0,0,0,0,0,0,0,0],
@@ -114,11 +73,5 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
           [0,0,0,1,6,0,8,0,0],
           [6,0,0,0,0,0,0,0,0]]
 
-
 if __name__ == "__main__":
-
-    for solution in solve_sudoku((3, 3), puzzle):
-        print(*solution, sep='\n')
-
-    # import doctest
-    # doctest.testmod()
+    env = SudokuEnv( grid=np.array(puzzle) )
