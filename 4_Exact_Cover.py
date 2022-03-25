@@ -1,3 +1,6 @@
+# By Oliver Heilmann
+# Date: 25/03/2022
+
 from collections import defaultdict
 from collections import Counter
 from tests import run_tests, create_puzzle
@@ -48,6 +51,10 @@ class SudokuEnv:
         for (r, c), val in np.ndenumerate( grid ):
             if val: self.__eliminateRCV( (r, c, val) )
 
+    def is_goal( self ):
+        """Goal state reached if every value is not equal to zero."""
+        return True if 0 not in self.result else False
+
     def __eliminateRCV( self, RCV ):
         """Delete all conflicting rcv's, but store them in a returned list.'"""
         rcvStore = list()
@@ -58,7 +65,13 @@ class SudokuEnv:
             rcvStore.append( self.C.pop( c ) )
         return rcvStore
 
-
+    def __restoreRCV( self, RCV, rcvStore ):
+        """Restore the deleted rcv's that were passed as a list (opposite of eliminate method)."""
+        for c in self.R[ RCV ][::-1]:
+            self.R[ c ] = rcvStore.pop()
+            [ self.C[_c].add( _rcv )    for _rcv in self.C[ c ]     \
+                                        for _c in self.R[ _rcv ]    \
+                                        if _c != c ]
 
 
 

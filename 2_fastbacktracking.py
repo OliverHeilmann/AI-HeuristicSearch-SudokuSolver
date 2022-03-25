@@ -1,3 +1,9 @@
+# Code modified by Oliver Heilmann
+# Date: 25/03/2022
+#
+# Original author is Tech Tribe and the Github link can be found at:
+#       --> https://github.com/techtribeyt/sudoku
+
 from tests import run_tests, create_puzzle
 
 import numpy as np
@@ -24,11 +30,7 @@ def check_sudoku(grid):
     return True
 
 def sudoku_solver(grid):
-    '''
-    0: represents empty squares
-    1-9: numbers used by sudoku
-    arrays indexed by n-1 (ie number 5 is index 4)
-    '''
+    """Main backtracking solver."""
     # if check_sudoku(grid):
     # define 2D arrays to keep track whether each row/col/region needs number
     row = [[True] * 9 for i in range(9)]

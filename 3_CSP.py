@@ -173,8 +173,7 @@ def check_sudoku( grid ):
         box = grid[j:j+3, k:k+3][ grid[j:j+3, k:k+3] != 0 ]
         box_repeated = len( set(np.unique(box, return_counts=True)[1]) ) > 1
 
-        if row_repeated or col_repeated or box_repeated:
-            return False
+        if row_repeated or col_repeated or box_repeated: return False
     return True
 
 
