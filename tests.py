@@ -72,4 +72,4 @@ def run_tests( sudoku_solver , skip_tests : bool = False, puzzle=None):
                     break
         
     ET = time.process_time()
-    print(f"--> TOTAL TIME: {ET-ST}s\n")
+    print(f"--> TOTAL TIME: {(ET-ST)*1000}ms\n")

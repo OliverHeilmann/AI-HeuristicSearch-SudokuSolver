@@ -1,14 +1,43 @@
 # Code Description
+HIGH LEVEL SUMMARY OF THE WORK AND THEN TOUCH ON THE RESULTS FROM TESTING
 
 
-| Algorithm                                                       | Very Easy | Easy | Medium | Hard | Total |
-|-----------------------------------------------------------------|-----------|------|--------|------|-------|
-| Backtracking                                                    |           |      |        |      |       |
-| Fast Backtracking [Source](https://github.com/techtribeyt)      |           |      |        |      |       |
-| Constraint Satisfaction Propagation – Deepcopy                  |           |      |        |      |       |
-| Constraint Satisfaction Propagation – cPickle                   |           |      |        |      |       |
-| Exact Cover, Algorithm X (without Dancing Links) – Deepcopy     |           |      |        |      |       |
-| Exact Cover, Algorithm X (without Dancing Links) – Without Copy |           |      |        |      |       |
+## Testing Methods
+### Core Tests
+| Script Name           | **Algorithm**                                           | **Very Easy [ms]** | **Easy [ms]** | **Medium [ms]** | **Hard [ms]** | **Total [ms]** |
+|-----------------------|---------------------------------------------------------|--------------------|---------------|-----------------|---------------|----------------|
+| 1_backtracking.py     | Backtracking                                            |         21         |       20      |        47       |       –       |        –       |
+| 2_fastbacktracking.py | [Fast Backtracking](https://github.com/techtribeyt/sudoku/blob/main/code.py)     |         13         |       14      |        13       |      6822     |      6768      |
+| 3_CSP.py              | Constraint Satisfaction Propagation – Deepcopy          |         37         |       34      |        56       |      3254     |      3411      |
+| 3_CSP.py              | Constraint Satisfaction Propagation – cPickle           |         36         |       34      |        56       |      2341     |      2442      |
+| 4_Exact_Cover_DC.py   | Exact Cover, Algorithm X (no Dancing Links) – Deepcopy  |         851        |      599      |       2241      |     13324     |      17200     |
+| 4_Exact_Cover_WO.py   | Exact Cover, Algorithm X (no Dancing Links) – W.O. Copy |         52         |       53      |        55       |       92      |       246      |
+### Sudoku Generator
+
+
+## Backtracking
+### Algorithm Approach
+### Backtracking Algorithm
+### Fast Backtracking
+
+
+## Constraint Satisfaction Propagation
+### Algorithm Approach
+### Key Features
+### Deepcopy and cPickle
+![Deepcopy Impact](/images/deepcopy.png "Deepcopy showing significant performance limiter")
+
+
+## Exact Cover with Algorithm X (No Dancing Links)
+### Algorithm Approach
+### Key Features
+
+
+## Benefits of Cythonize
+
+
+## Future Improvements
+DANCING LINKS!!
 
 
 # Thoughts
