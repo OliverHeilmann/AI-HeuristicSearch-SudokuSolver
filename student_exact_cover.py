@@ -32,6 +32,7 @@ class SudokuState:
                     # Every block must contain each value, (block, val)
                     ("Block", (b, v))
                 ]
+    print(1)
 
     def __init__(self, values: np.ndarray):
         """
@@ -59,6 +60,7 @@ class SudokuState:
                     [("Block", (blk, val)) for blk in range(9) for val in range(1, 10)]
             )
         }
+        print(1)
 
         # Populate A with the associated RCVs
         for rcv, consts in SudokuState.get_constraints.items():
@@ -72,6 +74,9 @@ class SudokuState:
                     self.remove_conflicting_rcvs((y, x, value))
                 except KeyError:
                     self.solvable = False
+
+        
+        print(1)
 
     def remove_conflicting_rcvs(self, rcv: (int, int, int)):
         """
@@ -262,4 +267,4 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
 
 if __name__ == "__main__":
     # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False, puzzle=np.array(puzzle))
+    run_tests( sudoku_solver, skip_tests=False) #puzzle=np.array(puzzle))

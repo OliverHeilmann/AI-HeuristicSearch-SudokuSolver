@@ -68,7 +68,7 @@ def solve(X, Y, solution):
     if not X:
         yield list(solution)
     else:
-        c = min(X, key=lambda c: len(X[c]))
+        c = min(X, key=lambda c: len(X[c])) # least constraining
         for r in list(X[c]):
             solution.append(r)
             cols = select(X, Y, r)
@@ -131,7 +131,7 @@ puszzle = [[8, 0,0,2, 0,7, 0,0,0],
 if __name__ == "__main__":
 
     ST = time.process_time()
-    for solution in sudoku_solver(puzzle):
+    for solution in sudoku_solver(grid):
         # print(*solution, sep='\n')
         pass
     ET = time.process_time()

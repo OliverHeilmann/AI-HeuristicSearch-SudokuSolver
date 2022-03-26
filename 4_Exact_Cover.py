@@ -16,10 +16,10 @@ import copy
 class SudokuEnv:
     """Sudoku environment from which all constraint satisfaction happens."""
     def __init__( self, grid : np.ndarray ):
-        (row, col) = grid.shape
+        (row, self.col) = grid.shape
 
         # init final values np array (could deepcopy grid but will be looping through below anyway)
-        self.result = np.array( [[0] * row] * col )
+        self.result = np.array( [[0] * row] * self.col )
 
         self.R = dict()
         self.C = defaultdict( lambda : set() )  # dynamically create set when key is made
@@ -48,6 +48,7 @@ class SudokuEnv:
             self.C[ "BoxN", (b, val) ].add( (r, c, val) )
 
         # loop through grid and delete rcv's which conflict with pre-assigned grid vals
+        # ( no need to store these as the values are already fixed on Sudoku grid )
         for (r, c), val in np.ndenumerate( grid ):
             if val: self.__eliminateRCV( (r, c, val) )
 
@@ -61,17 +62,65 @@ class SudokuEnv:
         for c in self.R[ RCV ]:   # for all the cols at current row
             for _rcv in self.C[ c ]: # for all the rcvs at current col (col and row now)
                 for _c in self.R[ _rcv ]: # for the col entries at current row
-                    if _c != c: self.C[_c].remove( _rcv )
+                    if _c != c: self.C[ _c ].remove( _rcv )
             rcvStore.append( self.C.pop( c ) )
         return rcvStore
 
     def __restoreRCV( self, RCV, rcvStore ):
         """Restore the deleted rcv's that were passed as a list (opposite of eliminate method)."""
         for c in self.R[ RCV ][::-1]:
-            self.R[ c ] = rcvStore.pop()
-            [ self.C[_c].add( _rcv )    for _rcv in self.C[ c ]     \
-                                        for _c in self.R[ _rcv ]    \
-                                        if _c != c ]
+            self.R[ c ] = rcvStore.pop()    # does this need to be reversed?
+            for _rcv in self.C[ c ]:
+                for _c in self.R[ _rcv ]:
+                    if _c != c: self.C[ _c ].add( _rcv )
+
+    def assign_value( self, rcv ):
+        """Assign value to Sudoku results array and eliminate option from """
+
+        # child_state = cPickle.loads( cPickle.dumps(self, -1) )
+        child_state = copy.deepcopy( self )
+
+        ( r, c, v ) = rcv
+        child_state.result[ r ][ c ] = v  # add entry to results array
+
+        child_state.__eliminateRCV( rcv )
+        return child_state
+
+    def __str__( self ):
+        """Return a string Sudoku matrix for debugging."""
+        return f"{self.result}"
+
+
+###################### SEARCHING ALGORITHM BELOW ##############################
+def depth_first_search( state ):
+    """Use backtracking search approach with constraint satisfaction propagation."""
+
+    c = min( state.C, key=lambda c: len(state.C[c]) ) # pick most constrained column
+
+    for rcv in list( state.C[c] ):
+
+        new_state = state.assign_value( rcv )
+
+        if new_state.is_goal():
+            return new_state
+
+        deep_state = depth_first_search( new_state )
+
+        if deep_state is not None and deep_state.is_goal():
+            return deep_state
+
+    return None
+
+def sudoku_solver( puzzle : np.array ):
+    """Function to conform with coursework framework"""
+    
+    state = depth_first_search( SudokuEnv( puzzle ) )
+
+    if depth_first_search( SudokuEnv( puzzle ) ) is not None:
+        # convert result into a numpy array format
+        return state.result
+
+    return -np.ones((9, 9))
 
 
 
@@ -88,3 +137,5 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
 
 if __name__ == "__main__":
     env = SudokuEnv( grid=np.array(puzzle) )
+
+    run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(puzzle))
