@@ -69,7 +69,7 @@ class SudokuEnv:
     def __restoreRCV( self, RCV, rcvStore : list ):
         """Restore the deleted rcv's that were passed as a list (opposite of eliminate method)."""
         for c in self.R[ RCV ][::-1]:
-            self.R[ c ] = rcvStore.pop()    # does this need to be reversed?
+            self.C[ c ] = rcvStore.pop()
             for _rcv in self.C[ c ]:
                 for _c in self.R[ _rcv ]:
                     if _c != c: self.C[ _c ].add( _rcv )
@@ -82,59 +82,42 @@ class SudokuEnv:
         rcvStore = self.__eliminateRCV( RCV )
         return rcvStore
 
-    def unassign_value( self, rcvStore : list ):
+    def unassign_value( self, RCV : tuple, rcvStore : list ):
         """Loop through rcv list and undo previous assignments and restore RCV dict."""
-        rcvStore = self.__restoreRCV( rcv )
+        ( r, c, v ) = RCV
+        self.result[ r ][ c ] = 0  # set back to zero
 
-        for rcvSet in rcvStore:
-            for rcv in rcvSet:
-                ( r, c, v ) = rcv
-                self.result[ r ][ c ] = 0  # set back to zero
+        self.__restoreRCV( RCV, rcvStore )
   
-
     def __str__( self ):
         """Return a string Sudoku matrix for debugging."""
         return f"{self.result}"
 
 
 ###################### SEARCHING ALGORITHM BELOW ##############################
-def depth_first_search( state ):
+def backtrack( state : SudokuEnv ):
     """Use backtracking search approach with constraint satisfaction propagation."""
-
     c = min( state.C, key=lambda c: len(state.C[c]) ) # pick most constrained column
 
+    # loop through rcv's in most constrained column
     for rcv in list( state.C[c] ):
 
-        rcvStore = state.assign_value( rcv )
+        rcvStore = state.assign_value( rcv )    # assign rcv
 
-        if state.is_goal():
+        # if goal state or backtrack has returned a valid state, return state again
+        if state.is_goal() or backtrack( state ):
             return state
 
-        depth_first_search( state )
-
-        state.unassign_value( rcvStore )    # restore if gets here!
-
-        # state = depth_first_search( state )
-
-        # if state is not None and state.is_goal():
-        #     return state
-
+        state.unassign_value( rcv, rcvStore )   # undo the assign if line is reached
     return None
 
-
 def sudoku_solver( puzzle : np.array ):
-    """Function to conform with coursework framework"""
-    
-    state = depth_first_search( SudokuEnv( puzzle ) )
-
-    if depth_first_search( SudokuEnv( puzzle ) ) is not None:
-        # convert result into a numpy array format
-        return state.result
-
-    return -np.ones((9, 9))
+    """Function to conform with coursework framework""" 
+    state = backtrack( SudokuEnv( puzzle ) )
+    return state.result if state is not None else -np.ones((9, 9))
 
 
-
+###################### PERFORMANCE TESTS BELOW ##############################
 # V Hard Puzzle
 puzzle = [[0,6,1,0,0,7,0,0,3],
           [0,9,2,0,0,3,0,0,0],
@@ -147,6 +130,5 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
           [6,0,0,0,0,0,0,0,0]]
 
 if __name__ == "__main__":
-    env = SudokuEnv( grid=np.array(puzzle) )
-
-    run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(puzzle))
+    # pass the solver through to run tests on it
+    run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(grid))
