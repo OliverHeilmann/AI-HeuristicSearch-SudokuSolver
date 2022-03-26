@@ -77,8 +77,8 @@ class SudokuEnv:
     def assign_value( self, rcv ):
         """Assign value to Sudoku results array and eliminate option from """
 
-        # child_state = cPickle.loads( cPickle.dumps(self, -1) )
-        child_state = copy.deepcopy( self )
+        child_state = cPickle.loads( cPickle.dumps(self, -1) )
+        # child_state = copy.deepcopy( self )
 
         ( r, c, v ) = rcv
         child_state.result[ r ][ c ] = v  # add entry to results array
