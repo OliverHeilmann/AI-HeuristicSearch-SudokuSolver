@@ -56,7 +56,7 @@ class SudokuEnv:
         """Goal state reached if every value is not equal to zero."""
         return True if 0 not in self.result else False
 
-    def __eliminateRCV( self, RCV ):
+    def __eliminateRCV( self, RCV : tuple ):
         """Delete all conflicting rcv's, but store them in a returned list.'"""
         rcvStore = list()
         for c in self.R[ RCV ]:   # for all the cols at current row
@@ -66,7 +66,7 @@ class SudokuEnv:
             rcvStore.append( self.C.pop( c ) )
         return rcvStore
 
-    def __restoreRCV( self, RCV, rcvStore ):
+    def __restoreRCV( self, RCV, rcvStore : list ):
         """Restore the deleted rcv's that were passed as a list (opposite of eliminate method)."""
         for c in self.R[ RCV ][::-1]:
             self.R[ c ] = rcvStore.pop()    # does this need to be reversed?
@@ -74,17 +74,23 @@ class SudokuEnv:
                 for _c in self.R[ _rcv ]:
                     if _c != c: self.C[ _c ].add( _rcv )
 
-    def assign_value( self, rcv ):
-        """Assign value to Sudoku results array and eliminate option from """
+    def assign_value( self, RCV : tuple ):
+        """Assign value to Sudoku results array and eliminate option."""
+        ( r, c, v ) = RCV
+        self.result[ r ][ c ] = v  # add entry to results array
 
-        child_state = cPickle.loads( cPickle.dumps(self, -1) )
-        # child_state = copy.deepcopy( self )
+        rcvStore = self.__eliminateRCV( RCV )
+        return rcvStore
 
-        ( r, c, v ) = rcv
-        child_state.result[ r ][ c ] = v  # add entry to results array
+    def unassign_value( self, rcvStore : list ):
+        """Loop through rcv list and undo previous assignments and restore RCV dict."""
+        rcvStore = self.__restoreRCV( rcv )
 
-        child_state.__eliminateRCV( rcv )
-        return child_state
+        for rcvSet in rcvStore:
+            for rcv in rcvSet:
+                ( r, c, v ) = rcv
+                self.result[ r ][ c ] = 0  # set back to zero
+  
 
     def __str__( self ):
         """Return a string Sudoku matrix for debugging."""
@@ -99,17 +105,22 @@ def depth_first_search( state ):
 
     for rcv in list( state.C[c] ):
 
-        new_state = state.assign_value( rcv )
+        rcvStore = state.assign_value( rcv )
 
-        if new_state.is_goal():
-            return new_state
+        if state.is_goal():
+            return state
 
-        deep_state = depth_first_search( new_state )
+        depth_first_search( state )
 
-        if deep_state is not None and deep_state.is_goal():
-            return deep_state
+        state.unassign_value( rcvStore )    # restore if gets here!
+
+        # state = depth_first_search( state )
+
+        # if state is not None and state.is_goal():
+        #     return state
 
     return None
+
 
 def sudoku_solver( puzzle : np.array ):
     """Function to conform with coursework framework"""
