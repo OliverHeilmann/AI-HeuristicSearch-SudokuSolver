@@ -2,15 +2,10 @@
 # Date: 25/03/2022
 
 from collections import defaultdict
-from collections import Counter
 from tests import run_tests, create_puzzle
 from itertools import product
-
 import numpy as np
-import _pickle as cPickle
-import time
-import random
-import copy
+
 
 ###################### SUDOKU ENVIRONMENT BELOW ##############################
 class SudokuEnv:
@@ -101,7 +96,6 @@ def backtrack( state : SudokuEnv ):
 
     # loop through rcv's in most constrained column
     for rcv in list( state.C[c] ):
-
         rcvStore = state.assign_value( rcv )    # assign rcv
 
         # if goal state or backtrack has returned a valid state, return state again
