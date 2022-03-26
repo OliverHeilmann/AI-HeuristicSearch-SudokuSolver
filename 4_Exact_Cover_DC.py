@@ -6,7 +6,9 @@
 from collections import defaultdict
 from tests import run_tests, create_puzzle
 from itertools import product
+
 import numpy as np
+import copy
 
 ###################### SUDOKU ENVIRONMENT BELOW ##############################
 class SudokuEnv:
@@ -52,7 +54,7 @@ class SudokuEnv:
         """Goal state reached if every value is not equal to zero."""
         return True if 0 not in self.result else False
 
-    def __eliminateRCV( self, RCV : tuple ):
+    def __eliminateRCV( self, RCV ):
         """Delete all conflicting rcv's, but store them in a returned list.'"""
         rcvStore = list()
         for c in self.R[ RCV ]:   # for all the cols at current row
@@ -62,53 +64,46 @@ class SudokuEnv:
             rcvStore.append( self.C.pop( c ) )
         return rcvStore
 
-    def __restoreRCV( self, RCV, rcvStore : list ):
-        """Restore the deleted rcv's that were passed as a list (opposite of eliminate method)."""
-        for c in self.R[ RCV ][::-1]:
-            self.C[ c ] = rcvStore.pop()
-            for _rcv in self.C[ c ]:
-                for _c in self.R[ _rcv ]:
-                    if _c != c: self.C[ _c ].add( _rcv )
+    def assign_value( self, rcv ):
+        """Assign value to Sudoku results array and eliminate option from """
 
-    def assign_value( self, RCV : tuple ):
-        """Assign value to Sudoku results array and eliminate option."""
-        ( r, c, v ) = RCV
-        self.result[ r ][ c ] = v  # add entry to results array
+        # child_state = cPickle.loads( cPickle.dumps(self, -1) )    # doesn't work with lambda functions
+        child_state = copy.deepcopy( self )
 
-        rcvStore = self.__eliminateRCV( RCV )
-        return rcvStore
+        ( r, c, v ) = rcv
+        child_state.result[ r ][ c ] = v  # add entry to results array
 
-    def unassign_value( self, RCV : tuple, rcvStore : list ):
-        """Loop through rcv list and undo previous assignments and restore RCV dict."""
-        ( r, c, v ) = RCV
-        self.result[ r ][ c ] = 0  # set back to zero
+        child_state.__eliminateRCV( rcv )
+        return child_state
 
-        self.__restoreRCV( RCV, rcvStore )
-  
     def __str__( self ):
         """Return a string Sudoku matrix for debugging."""
         return f"{self.result}"
 
 
 ###################### SEARCHING ALGORITHM BELOW ##############################
-def backtrack( state : SudokuEnv ):
+def depth_first_search( state ):
     """Use backtracking search approach with constraint satisfaction propagation."""
+
     c = min( state.C, key=lambda c: len(state.C[c]) ) # pick most constrained column
 
-    # loop through rcv's in most constrained column
     for rcv in list( state.C[c] ):
-        rcvStore = state.assign_value( rcv )    # assign rcv
 
-        # if goal state or backtrack has returned a valid state, return state again
-        if state.is_goal() or backtrack( state ):
-            return state
+        new_state = state.assign_value( rcv )
 
-        state.unassign_value( rcv, rcvStore )   # undo the assign if line is reached
+        if new_state.is_goal():
+            return new_state
+
+        deep_state = depth_first_search( new_state )
+
+        if deep_state is not None and deep_state.is_goal():
+            return deep_state
+
     return None
 
 def sudoku_solver( puzzle : np.array ):
-    """Function to conform with coursework framework""" 
-    state = backtrack( SudokuEnv( puzzle ) )
+    """Function to conform with coursework framework"""
+    state = depth_first_search( SudokuEnv( puzzle ) )
     return state.result if state is not None else -np.ones((9, 9))
 
 
@@ -125,5 +120,11 @@ puzzle = [[0,6,1,0,0,7,0,0,3],
           [6,0,0,0,0,0,0,0,0]]
 
 if __name__ == "__main__":
-    # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(grid))
+    env = SudokuEnv( grid=np.array(puzzle) )
+
+    run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(puzzle))
+
+    # for i in range(100):
+    #     puzzle = create_puzzle()
+    #     print(f"Puzzle: {i}")
+    #     run_tests( sudoku_solver, skip_tests=False, puzzle=puzzle )
