@@ -64,18 +64,10 @@ class SudokuEnv:
             rcvStore.append( self.C.pop( c ) )
         return rcvStore
 
-    def __restoreRCV( self, RCV, rcvStore ):
-        """Restore the deleted rcv's that were passed as a list (opposite of eliminate method)."""
-        for c in self.R[ RCV ][::-1]:
-            self.R[ c ] = rcvStore.pop()    # does this need to be reversed?
-            for _rcv in self.C[ c ]:
-                for _c in self.R[ _rcv ]:
-                    if _c != c: self.C[ _c ].add( _rcv )
-
     def assign_value( self, rcv ):
         """Assign value to Sudoku results array and eliminate option from """
 
-        # child_state = cPickle.loads( cPickle.dumps(self, -1) )
+        # child_state = cPickle.loads( cPickle.dumps(self, -1) )    # doesn't work with lambda functions
         child_state = copy.deepcopy( self )
 
         ( r, c, v ) = rcv
@@ -111,17 +103,11 @@ def depth_first_search( state ):
 
 def sudoku_solver( puzzle : np.array ):
     """Function to conform with coursework framework"""
-    
     state = depth_first_search( SudokuEnv( puzzle ) )
-
-    if depth_first_search( SudokuEnv( puzzle ) ) is not None:
-        # convert result into a numpy array format
-        return state.result
-
-    return -np.ones((9, 9))
+    return state.result if state is not None else -np.ones((9, 9))
 
 
-
+###################### PERFORMANCE TESTS BELOW ##############################
 # V Hard Puzzle
 puzzle = [[0,6,1,0,0,7,0,0,3],
           [0,9,2,0,0,3,0,0,0],
