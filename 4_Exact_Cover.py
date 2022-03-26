@@ -4,14 +4,10 @@
 # creating new branch for improving exact cover
 
 from collections import defaultdict
-from collections import Counter
 from tests import run_tests, create_puzzle
 from itertools import product
 
 import numpy as np
-import _pickle as cPickle
-import time
-import random
 import copy
 
 ###################### SUDOKU ENVIRONMENT BELOW ##############################
@@ -141,3 +137,8 @@ if __name__ == "__main__":
     env = SudokuEnv( grid=np.array(puzzle) )
 
     run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(puzzle))
+
+    # for i in range(100):
+    #     puzzle = create_puzzle()
+    #     print(f"Puzzle: {i}")
+    #     run_tests( sudoku_solver, skip_tests=False, puzzle=puzzle )
