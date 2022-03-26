@@ -6,13 +6,14 @@ HIGH LEVEL SUMMARY OF THE WORK AND THEN TOUCH ON THE RESULTS FROM TESTING
 ### Core Tests
 | Script Name           | **Algorithm**                                           | **Very Easy [ms]** | **Easy [ms]** | **Medium [ms]** | **Hard [ms]** | **Total [ms]** |
 |-----------------------|---------------------------------------------------------|--------------------|---------------|-----------------|---------------|----------------|
-| 1_backtracking.py     | Backtracking                                            |         21         |       20      |        47       |       –       |        –       |
-| 2_fastbacktracking.py | [Fast Backtracking](https://github.com/techtribeyt/sudoku/blob/main/code.py)     |         13         |       14      |        13       |      6822     |      6768      |
-| 3_CSP.py              | Constraint Satisfaction Propagation – Deepcopy          |         37         |       34      |        56       |      3254     |      3411      |
-| 3_CSP.py              | Constraint Satisfaction Propagation – cPickle           |         36         |       34      |        56       |      2341     |      2442      |
-| 4_Exact_Cover_DC.py   | Exact Cover, Algorithm X (no Dancing Links) – Deepcopy  |         851        |      599      |       2241      |     13324     |      17200     |
-| 4_Exact_Cover_WO.py   | Exact Cover, Algorithm X (no Dancing Links) – W.O. Copy |         52         |       53      |        55       |       92      |       246      |
+| _1backtracking.py     | Backtracking                                            |         21         |       20      |        47       |       –       |        –       |
+| _2fastbacktracking.py | [Fast Backtracking](https://github.com/techtribeyt/sudoku/blob/main/code.py)     |         13         |       14      |        13       |      6822     |      6768      |
+| _3CSP.py              | Constraint Satisfaction Propagation – Deepcopy          |         37         |       34      |        56       |      3254     |      3411      |
+| _3CSP.py              | Constraint Satisfaction Propagation – cPickle           |         36         |       34      |        56       |      2341     |      2442      |
+| _4Exact_Cover_DC.py   | Exact Cover, Algorithm X (no Dancing Links) – Deepcopy  |         851        |      599      |       2241      |     13324     |      17200     |
+| _4Exact_Cover_WO.py   | Exact Cover, Algorithm X (no Dancing Links) – W.O. Copy |         52         |       53      |        55       |       92      |       246      |
 ### Sudoku Generator
+SUDOKU GENERATOR INSIDE THE TESTS.PY SCRIPT FILE --> THIS WAS USEFUL FOR FINDING OUT VARIOUS ALGORITHM WEAKNESSES
 
 
 ## Backtracking
