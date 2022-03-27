@@ -1,7 +1,12 @@
 # By Oliver Heilmann
 # Date: 25/03/2022
 
-# creating new branch for improving exact cover
+# Decription:
+#   --> Algorithm X is a recursive, nondeterministic, depth-first, backtracking algorithm 
+#       that finds all solutions to the exact cover problem. Rather than using the Dancing 
+#       Links approach (DLX), this code recursively eliminates and restores dictionary
+#       elements, as described in A. Assaf's website:
+#               https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html 
 
 from collections import defaultdict
 from tests import run_tests, create_puzzle
@@ -113,17 +118,17 @@ def sudoku_solver( puzzle : np.array ):
 
 
 ###################### PERFORMANCE TESTS BELOW ##############################
-# V Hard Puzzle
-puzzle = [[0,6,1,0,0,7,0,0,3],
-          [0,9,2,0,0,3,0,0,0],
-          [0,0,0,0,0,0,0,0,0],
-          [0,0,8,5,3,0,0,0,0],
-          [0,0,0,0,0,0,5,0,4],
-          [5,0,0,0,0,8,0,0,0],
-          [0,4,0,0,0,0,0,0,1],
-          [0,0,0,1,6,0,8,0,0],
-          [6,0,0,0,0,0,0,0,0]]
+# World's Hardest Puzzle
+puzzle = [[8,0,0,0,0,0,0,0,0],
+          [0,0,3,6,0,0,0,0,0],
+          [0,7,0,0,9,0,2,0,0],
+          [0,5,0,0,0,7,0,0,0],
+          [0,0,0,0,4,5,7,0,0],
+          [0,0,0,1,0,0,0,3,0],
+          [0,0,1,0,0,0,0,6,8],
+          [0,0,8,5,0,0,0,1,0],
+          [0,9,0,0,0,0,4,0,0]]
 
 if __name__ == "__main__":
     # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(grid))
+    run_tests( sudoku_solver, skip_tests=False, puzzle=np.array(puzzle))
