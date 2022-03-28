@@ -1,5 +1,5 @@
 # Repository Description
-The contents enclosed in this repository explore how backtracking (BT), constraint satisfaction propagation (CSP) and exact cover (EC) algorithm performances differ when solving Sudoku puzzles of varying complexity. For each of these algorithms, various modifications were made to reduce computational time and memory usage; the results of said experiments have been presented and disclosed below. 
+The contents enclosed in this repository explore how backtracking (BT), constraint satisfaction propagation (CSP) and exact cover (EC) algorithm performances differ when solving Sudoku puzzles of varying complexity. For each of these algorithms, various modifications were made to reduce computational time and memory usage; the results of said experiments have been presented and discussed below. 
 
 Overall, the Exact Cover, Algorithm X (without Dancing Links) approach outperformed all other algorithms (on average) and, as such, was selected for submission.
 
@@ -55,6 +55,7 @@ puzzle = [[8,0,0,0,0,0,0,0,0],
 | [_2fastbacktracking.py](_2fastbacktracking.py) | [Fast Backtracking](https://github.com/techtribeyt/sudoku/blob/main/code.py)  |         135        |
 | [_3CSP.py](_3CSP.py)                           | Constraint Satisfaction Propagation – Deepcopy                                |          23        |
 | [_3CSP.py](_3CSP.py)                           | Constraint Satisfaction Propagation – cPickle                                 |          15        |
+| [_3CSP.py](_3CSP.py)                           | Constraint Satisfaction Propagation – cPickle & Cython                        |          10        |
 | [_4Exact_Cover_DC.py](_4Exact_Cover_DC.py)     | Exact Cover, Algorithm X (no Dancing Links) – Deepcopy                        |       26369        |
 | [_4Exact_Cover_WO.py]( _4Exact_Cover_WO.py)    | Exact Cover, Algorithm X (no Dancing Links) – W.O. Copy                       |          75        |
 
@@ -165,7 +166,7 @@ Code representation of this method presented below:
 ```
 
 ### Most Constraining Cell
-Adopting the approach of 'Most Constraining Cell' increases the probability that the algorithm will fail faster. Additionally, it will ensure that paths which have a limited number of available cells are tested first. Often, certain cells in Sudoku puzzles have a limited number of options, so it is favorable to place/enforce these values first. 
+Adopting the approach of 'Most Constraining Cell' increases the probability that the algorithm will fail faster, therefore, closing off branches in the state space. Additionally, it will ensure that paths which have a limited number of available cells are tested first. Often, certain cells in Sudoku puzzles have a limited number of options, so it is favorable to place/enforce these values first. 
 ```python
 def pick_next_cell( state ):
     """Return the index of the most constrained cell next."""
@@ -175,7 +176,7 @@ def pick_next_cell( state ):
 ```
 
 ### Most Constraining Value
-Similar to above, order the values in a sequence which is the most constraining. This approach counts the number of X's already placed in the Sudoku puzzle, and then prioritizes them in queue.
+Similar to above, order the values in a sequence which is the most constraining. This approach counts the number of X's already placed in the Sudoku puzzle, and then prioritizes them in queue, with priority given to numbers which occur most frequently in the solution puzzle.
 ```python
 def order_possible_values( state, index ):
     """Order the values so most constraining value (value placed most frequently) is chosen."""
