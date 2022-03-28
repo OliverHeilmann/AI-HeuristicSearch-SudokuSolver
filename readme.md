@@ -86,6 +86,7 @@ A simple backtracking recursively builds solution candidates and abandons those 
                             grid[y][x] = 0  # re-write cell to 0
                     return False
 ```
+
 ### Discussion
 Testings results (shown in the tables above) demonstrated that a basic backtracking algorithm worked very well in the 'very easy' to 'medium' Sudoku puzzles, but then significantly underperformed in the 'hard' puzzles (relative to the others). Looking more closely at the tests themselves, it was clear to see that the earlier tests were significantly "simpler", in the sense that many of the cells had already been filled, than their harder counterparts. Remembering that complexity exponentially increases as the state space increases, this observation intuitively makes sense. Due to the algorithm simplicity, it also makes sense that solutions were found faster than for other approaches.
 
@@ -188,7 +189,7 @@ Using the [Scalene](https://github.com/plasma-umass/scalene) Python performance 
 
 ![Deepcopy Impact](/images/deepcopy.png "Deepcopy showing significant performance limiter")
 
-By replacing Deepcopy with the cPickle equivalent (a C compiled version of Deepcopy), total time taken to complete the coursework tests reduced by ~30%, as outlined in the table presented above.
+By replacing Deepcopy with the cPickle equivalent (a C compiled version of Deepcopy), total time taken to complete the coursework tests reduced by ~30%, as outlined in the table presented above. _Note that initially, a custom deepcopy function was tested but yielded no improvement and was therefore abandoned – the code remains and is commented out however._
 
 **_Note that cPickle is part of Python3 standard library so is acceptable for use in this coursework._**
 
@@ -276,6 +277,7 @@ Overall, the exact cover Algorithm X implementation was the fastest and, therefo
 2) **Mutable CSP variation:** As mentioned above, a mutable version of the CSP algorithm might yield significant performance improvements above its current state.
 
 # Useful Links/ Sources
+---
 1) [Optimisation of Algorithm](https://hexadix.com/hard-sudoku-solver-algorithm-part-2/)
 2) [Analysis of Results (plots etc)](https://norvig.com/sudoku.html)
 3) [EXACT COVER EXPLAINED](http://www.ams.org/publicoutreach/feature-column/fcarc-kanoodle#:~:text=Sudoku%20is%20also%20an%20exact%20cover%20problem&text=Every%20cell%20contains%20exactly%20one,one%20occurrence%20of%20each%20symbol.)
