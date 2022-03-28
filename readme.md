@@ -211,20 +211,22 @@ As [Wikipedia](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X) puts it, Alg
 
 One disadvantage of this algorithm, discussed in [D. Knuth's paper on Dancing Links](https://www.ocf.berkeley.edu/~jchu/publicportal/sudoku/0011047.pdf), is the computational load created by repeatedly eliminating and restoring rows and columns in the matrix representation the problem space; to combat this, the Dancing Links approach is used. For this implementation, this approach was omitted due to design complexity however and, rather, the mutable approach described in the previous section was implemented – credit to A. Assaf who describes this approach [here](https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html).
 
+### No Puzzle Pre-checker
+For all other algorithms, a **check_sudoku( )** function was used to scan each puzzle before attempting a solution in order to avoid attempting to solve impossible problems. Due to the architecture of this algorithm, as well as its speed, this step was not necessary, thereby reducing overall algorithm complexity.
 
 ### Eliminate and Restoring RCVs (Rows, Cols and Boxes)
 While a similar _eliminate_ function was used in the CSP approach, here, a _restore_ algorithm was also introduced in order to mitigate the requirements of a cPickle/ Deepcopying of each state. These two method implementations are presented below:
 
 ```python
- def __eliminateRCV( self, RCV : tuple ):
-        """Delete all conflicting rcv's, but store them in a returned list.'"""
-        rcvStore = list()
-        for c in self.R[ RCV ]:   # for all the cols at current row
-            for _rcv in self.C[ c ]: # for all the rcvs at current col (col and row now)
-                for _c in self.R[ _rcv ]: # for the col entries at current row
-                    if _c != c: self.C[ _c ].remove( _rcv )
-            rcvStore.append( self.C.pop( c ) )
-        return rcvStore
+    def __eliminateRCV( self, RCV : tuple ):
+            """Delete all conflicting rcv's, but store them in a returned list.'"""
+            rcvStore = list()
+            for c in self.R[ RCV ]:   # for all the cols at current row
+                for _rcv in self.C[ c ]: # for all the rcvs at current col (col and row now)
+                    for _c in self.R[ _rcv ]: # for the col entries at current row
+                        if _c != c: self.C[ _c ].remove( _rcv )
+                rcvStore.append( self.C.pop( c ) )
+            return rcvStore
 ```
 
 ```python
@@ -237,6 +239,8 @@ While a similar _eliminate_ function was used in the CSP approach, here, a _rest
                     if _c != c: self.C[ _c ].add( _rcv )
 ```
 
+### Modified Backtracking (Restoring Mutable Data)
+The only major change here is the inclusion of the 'unassign_value' after checking if a given state is a goal state i.e. if not a goal state then restore the value back to what it was before (and update S<sup>*</sup>).
 ```python
 def backtrack( state : SudokuEnv ):
     """Use backtracking search approach with constraint satisfaction propagation."""
@@ -254,29 +258,30 @@ def backtrack( state : SudokuEnv ):
     return None
 ```
 
-## Performance Improvements
----
+### Discussion
+As outlined in the table at the start of this ReadMe, the overall performance improvements are significant using Algorithm X. What is interesting to see however is how the algorithm performed significantly worse when using the Deepcopy approach, where each new state is an immutable copy of the previous. 
 
+In actuality, this does make intuitive sense however as each and every subset selection in the Algorithm X would generate a new Deepcopy state. In the CSP algorithm however, the singleton implementation ensured that many states would be _automatically_ enforced **before** moving to the next state. 
 
+Fortunately, the mutable implementation of Algorithm X was sufficiently performant to negate the negative effects of not having a singleton method. To make this comparison more "fair", it would be interesting to modify the CSP algorithm to a mutable version in order to see whether the performance would improve by the same/ similar margin as in Algorithm X's case.
+
+As a final observation, it is interesting to see that Algorithm X compute time appeared to scale linearly with puzzle complexity, whereas the other algorithms would take _seemingly_ exponentially longer with increasing puzzle difficulty; though this might be due to the increasing number of Deepcopy states being generated (hence the interest in a mutable CSP variation).
+
+### Conclusion
+Overall, the exact cover Algorithm X implementation was the fastest and, therefore was selected for the coursework submission.
 
 ## Future Improvements
-DANCING LINKS!!
-
-
-
-
-HIGH LEVEL SUMMARY OF THE WORK AND THEN TOUCH ON THE RESULTS FROM TESTING. MENTION DATA STRUCTURE! Don't need a pre-checker with contstraint satisfaction because the constraints are such that a solution will never be found anyway
-
+---
+1) **Dancing Links/ Algorithm DLX:** As described in D. Knuth's work, this approach reduces computational load and, therefore, is likely to further improve algorithm performance.
+2) **Mutable CSP variation:** As mentioned above, a mutable version of the CSP algorithm might yield significant performance improvements above its current state.
 
 # Useful Links/ Sources
-1) Iterative Hill Climbing... what are the impacts of this? Remember to do tie breaking, else will continually test same branches
-2) Mutability of objects, better to not deepcopy and just overwrite the object? Is this true? Discuss
-3) [Optimisation of Algorithm](https://hexadix.com/hard-sudoku-solver-algorithm-part-2/)
-4) [Analysis of Results (plots etc)](https://norvig.com/sudoku.html)
-5) [EXACT COVER EXPLAINED](http://www.ams.org/publicoutreach/feature-column/fcarc-kanoodle#:~:text=Sudoku%20is%20also%20an%20exact%20cover%20problem&text=Every%20cell%20contains%20exactly%20one,one%20occurrence%20of%20each%20symbol.)
-6) [Dancing Links](https://www.ocf.berkeley.edu/~jchu/publicportal/sudoku/0011047.pdf)
-7) [Algorithm X in 30 Lines](https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html)
-8) [Exact Cover](https://en.wikipedia.org/wiki/Exact_cover#Detailed_example)
-9) [Algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X)
-10) [Doubly Linked List](https://en.wikipedia.org/wiki/Doubly_linked_list)
-11) [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links)
+1) [Optimisation of Algorithm](https://hexadix.com/hard-sudoku-solver-algorithm-part-2/)
+2) [Analysis of Results (plots etc)](https://norvig.com/sudoku.html)
+3) [EXACT COVER EXPLAINED](http://www.ams.org/publicoutreach/feature-column/fcarc-kanoodle#:~:text=Sudoku%20is%20also%20an%20exact%20cover%20problem&text=Every%20cell%20contains%20exactly%20one,one%20occurrence%20of%20each%20symbol.)
+4) [Dancing Links](https://www.ocf.berkeley.edu/~jchu/publicportal/sudoku/0011047.pdf)
+5) [Algorithm X in 30 Lines](https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html)
+6) [Exact Cover](https://en.wikipedia.org/wiki/Exact_cover#Detailed_example)
+7) [Algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X)
+8) [Doubly Linked List](https://en.wikipedia.org/wiki/Doubly_linked_list)
+9) [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links)
