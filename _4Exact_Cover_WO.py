@@ -5,8 +5,11 @@
 #   --> Algorithm X is a recursive, nondeterministic, depth-first, backtracking algorithm 
 #       that finds all solutions to the exact cover problem. Rather than using the Dancing 
 #       Links approach (DLX), this code recursively eliminates and restores dictionary
-#       elements, as described in A. Assaf's website:
-#               https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html 
+#       elements. While this is less computationally efficient, the benefits gained from 
+#       code simplicity, as well as the performance gain from using mutable data structures
+#       (i.e. not deepcopying states), were sufficiently justified. Thank you to A. Assaf 
+#       for his description on his alternative Algorithm X implimentation at the following
+#       website: https://www.cs.mcgill.ca/~aassaf9/.
 
 from collections import defaultdict
 from tests import run_tests, create_puzzle
@@ -131,4 +134,4 @@ puzzle = [[8,0,0,0,0,0,0,0,0],
 
 if __name__ == "__main__":
     # pass the solver through to run tests on it
-    run_tests( sudoku_solver, skip_tests=False, puzzle=np.array(puzzle))
+    run_tests( sudoku_solver, skip_tests=False) #puzzle=np.array(puzzle))

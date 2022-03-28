@@ -142,7 +142,7 @@ class SudokuEnv:
         return f"{np.matrix( d2array )}"
 
     # def __deepcopy__( self, memodict={} ):
-    #     """Custom Deepcopy to avoid uneccessary copying of object atributes (speed up code)."""
+    #     """Custom Deepcopy to avoid uneccessary copying of object attributes (speed up code)."""
     #     cls = self.__class__
     #     state = cls.__new__( cls )
     #     state.final_values = copy.deepcopy(self.final_values)#.copy()
@@ -236,6 +236,7 @@ if __name__ == "__main__":
     # pass the solver through to run tests on it
     run_tests( sudoku_solver, skip_tests=False) #, puzzle=np.array(puzzle))
 
+    # Test with puzzle generator
     # for i in range(100):
     #     puzzle = create_puzzle()
     #     print(f"Puzzle: {i}")
