@@ -1,4 +1,4 @@
-# Repository Description
+# Solving Sudoku with Heuristic Search
 The contents enclosed in this repository explore how backtracking (BT), constraint satisfaction propagation (CSP) and exact cover (EC) algorithm performances differ when solving Sudoku puzzles of varying complexity. For each of these algorithms, various modifications were made to reduce computational time and memory usage; the results of said experiments have been presented and discussed below. 
 
 Overall, the Exact Cover, Algorithm X (without Dancing Links) approach outperformed all other algorithms (on average) and, as such, was selected for submission.
