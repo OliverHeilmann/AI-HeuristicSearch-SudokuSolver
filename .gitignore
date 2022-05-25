@@ -6,3 +6,4 @@ build
 dep
 cythonize
 *.json
+sudoku.ipynb
