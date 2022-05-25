@@ -151,7 +151,9 @@ Another major benefit of adopting this approach was that all rules/ constraints 
 After adding the chosen value into the Sudoku solution, due to the constraints, some cells would only have x1 possible value remaining. In these cases, these values _must_ be filled into the solution. The singleton method would do exactly this and, as a result, reduce the number of branching nodes therefore reducing computation time; a diagramatic representation of this is presented below (note that the impact of deepcopy will be discussed in following sections):
 
 <!-- ![Singleton Representation](/images/singleton.png "Singleton Benefits.") -->
-<img src="/images/singleton.png" width="450">
+<p align="center">
+    <img src="/images/singleton.png" width="450">
+</p>
 
 Code representation of this method presented below:
 ```python
